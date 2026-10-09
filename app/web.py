@@ -6,6 +6,8 @@ import threading
 from pathlib import Path
 
 from starlette.applications import Starlette
+from starlette.middleware import Middleware
+from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 from starlette.responses import FileResponse, JSONResponse
 from starlette.routing import Mount, Route
@@ -188,4 +190,13 @@ routes = [
     Mount("/static", app=StaticFiles(directory=UI_DIR / "static"), name="static"),
 ]
 
-app = Starlette(debug=False, routes=routes)
+middleware = [
+    Middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_methods=["GET", "POST"],
+        allow_headers=["*"],
+    )
+]
+
+app = Starlette(debug=False, routes=routes, middleware=middleware)
