@@ -2,7 +2,8 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://netsage-ai.onrender.com/api/:path*"
+      "destination": "https://netsage-ai-rap0.onrender.com/api/:path*"
     }
   ]
 }
+
