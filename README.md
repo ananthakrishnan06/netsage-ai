@@ -1,5 +1,9 @@
-<<<<<<< HEAD
 # NetSage AI — Applied AI + Network Troubleshooting
+
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-netsage--ai-brightgreen?style=for-the-badge)](https://netsage-ai-rap0.onrender.com)
+
+> 🌐 **Live App:** [https://netsage-ai-rap0.onrender.com](https://netsage-ai-rap0.onrender.com)
+
 
 ## 1. Project Overview
 
@@ -453,7 +457,3 @@ Verification confirms.
 ```
 
 NetSage AI is therefore designed as an AI-assisted troubleshooting tool with human oversight rather than an autonomous network-change system.
-=======
-# netsage-ai
-AI-assisted Cisco network troubleshooting system
->>>>>>> 49ca746a8b456055a06eab69f23ac63bca9212aa
