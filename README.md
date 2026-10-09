@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # NetSage AI — Applied AI + Network Troubleshooting
 
 ## 1. Project Overview
@@ -452,3 +453,7 @@ Verification confirms.
 ```
 
 NetSage AI is therefore designed as an AI-assisted troubleshooting tool with human oversight rather than an autonomous network-change system.
+=======
+# netsage-ai
+AI-assisted Cisco network troubleshooting system
+>>>>>>> 49ca746a8b456055a06eab69f23ac63bca9212aa
