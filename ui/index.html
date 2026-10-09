@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f8fafc" />
+    <title>NetSage AI — Network Operations Console</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <a class="brand" href="#diagnose" aria-label="NetSage home">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 32 32" fill="none"><path d="M16 3.5 27 9.8v12.4L16 28.5 5 22.2V9.8L16 3.5Z" stroke="currentColor" stroke-width="1.8"/><path d="M10 18.7v-5.4l6-3.5 6 3.5v5.4l-6 3.5-6-3.5Z" stroke="currentColor" stroke-width="1.8"/><path d="M16 9.8v12.4m-6-9 12 7" stroke="currentColor" stroke-width="1.5"/></svg>
+          </span>
+          <span><strong>NetSage</strong><small>NETWORK INTELLIGENCE</small></span>
+        </a>
+
+        <div class="side-label">WORKSPACE</div>
+        <nav class="primary-nav" aria-label="Main navigation">
+          <button class="nav-item active" data-page="diagnose" type="button"><span class="nav-icon">⌕</span><span>Incident diagnosis</span><span class="nav-current"></span></button>
+          <button class="nav-item" data-page="dashboard" type="button"><span class="nav-icon">▦</span><span>Analytics dashboard</span></button>
+        </nav>
+
+        <div class="sidebar-bottom">
+          <div class="provider-card">
+            <span class="provider-dot"></span>
+            <div><strong>Groq inference</strong><small>API connection ready</small></div>
+            <span class="provider-chevron">⌄</span>
+          </div>
+          <div class="sidebar-foot"><span class="status-light"></span>Decision support active</div>
+          <div class="sidebar-version">NETSAGE AI <span>·</span> LOCAL WORKSPACE</div>
+        </div>
+      </aside>
+
+      <main class="main-content">
+        <header class="topbar">
+          <div class="breadcrumbs"><span>NetSage</span><span class="crumb-slash">/</span><strong id="breadcrumb-current">Incident diagnosis</strong></div>
+          <div class="topbar-actions">
+            <span class="env-badge"><span class="status-light"></span> SYSTEM ONLINE</span>
+            <button class="icon-button" type="button" aria-label="Help" title="Evidence-based network diagnosis">?</button>
+            <span class="avatar" aria-label="Network operator">NO</span>
+          </div>
+        </header>
+
+        <section id="diagnose-page" class="page active-page">
+          <div class="page-heading">
+            <div>
+              <div class="eyebrow"><span class="eyebrow-line"></span> CISCO NETWORK OPERATIONS</div>
+              <h1>Incident diagnosis</h1>
+              <p class="page-subtitle">Review network evidence and generate a grounded diagnosis.</p>
+            </div>
+            <div class="human-review-note"><span class="shield-icon">✓</span><span><strong>Human review required</strong><small>AI suggestions never change device configuration.</small></span></div>
+          </div>
+
+          <div class="case-toolbar">
+            <div class="case-picker-wrap">
+              <label for="case-select">ACTIVE CASE</label>
+              <select id="case-select" aria-label="Select a case"></select>
+            </div>
+            <div class="case-meta"><span id="case-type">—</span><span class="meta-divider"></span><span class="severity-dot"></span><span id="case-severity">—</span></div>
+            <button id="diagnose-button" class="button button-primary" type="button"><span class="spark-icon">✦</span> Diagnose with Groq <span class="button-arrow">→</span></button>
+          </div>
+
+          <div id="app-alert" class="alert hidden" role="alert"></div>
+
+          <div class="diagnosis-layout">
+            <div class="evidence-column">
+              <div class="section-heading"><div><span class="section-index">01</span><h2>Incident evidence</h2></div><span class="section-caption">SUPPLIED CASE DATA</span></div>
+
+              <article class="panel symptom-panel">
+                <div class="panel-heading"><div class="panel-title"><span class="panel-icon symptom-icon">!</span><h3>Network symptom</h3></div><span class="tag tag-high" id="severity-tag">HIGH SEVERITY</span></div>
+                <p id="case-symptom" class="symptom-text">Loading case evidence…</p>
+              </article>
+
+              <article class="panel topology-panel">
+                <div class="panel-heading"><div class="panel-title"><span class="panel-icon topology-icon">⌘</span><h3>Topology & context</h3></div></div>
+                <p id="case-topology" class="body-copy">—</p>
+              </article>
+
+              <article class="panel terminal-panel">
+                <div class="terminal-head"><div class="panel-title"><span class="terminal-spark">⌁</span><h3>Diagnostic command output</h3></div><button id="copy-output" class="copy-button" type="button" title="Copy diagnostic output"><span>▢</span> Copy</button></div>
+                <div class="terminal-command"><span class="terminal-prompt">$</span><code id="case-command">—</code></div>
+                <pre id="case-output" class="terminal-output">—</pre>
+                <div class="terminal-foot"><span><i></i> EVIDENCE CAPTURED</span><span>READ ONLY</span></div>
+              </article>
+
+              <article class="panel verification-panel">
+                <div class="verification-icon">✓</div><div><h3>Verification result</h3><p id="case-verification">—</p></div>
+              </article>
+            </div>
+
+            <div class="diagnosis-column">
+              <div class="section-heading"><div><span class="section-index">02</span><h2>AI assessment</h2></div><span class="model-chip"><span class="model-dot"></span> GROQ · QWEN 3.8</span></div>
+
+              <section id="diagnosis-empty" class="assessment-empty panel">
+                <div class="empty-visual"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="empty-core">⌁</div><span class="orbit-node node-a"></span><span class="orbit-node node-b"></span><span class="orbit-node node-c"></span></div>
+                <h3>Ready to investigate</h3>
+                <p>NetSage will analyze the supplied evidence and return a structured, reviewable diagnosis.</p>
+                <div class="empty-detail"><span>01</span> Evidence only <span class="detail-divider"></span><span>02</span> No automatic changes</div>
+              </section>
+
+              <section id="diagnosis-loading" class="assessment-loading panel hidden" aria-live="polite">
+                <div class="loader"></div><h3>Analyzing evidence</h3><p>Comparing symptom, topology, and command output…</p><div class="loading-track"><span></span></div><small>CONTACTING GROQ API</small>
+              </section>
+
+              <section id="diagnosis-result" class="diagnosis-result hidden">
+                <div class="result-banner" id="result-banner"><span class="result-state-icon">✓</span><div><strong id="result-status-title">Diagnosis ready</strong><small id="result-status-copy">Evidence-based assessment · human review required</small></div><span class="confidence-pill" id="confidence-pill">— confidence</span></div>
+                <article class="panel root-cause-panel"><div class="result-kicker">LIKELY FAULT CATEGORY</div><div class="category-row"><span id="result-category" class="category-badge">—</span><span id="result-osi" class="layer-label">—</span></div><h3 id="result-root-cause">—</h3><p class="concept-line">NETWORKING CONCEPT <strong id="result-concept">—</strong></p></article>
+                <article class="panel result-evidence"><div class="result-section-title"><span class="evidence-mark">↗</span><h3>Supporting evidence</h3></div><p id="result-evidence-text">—</p><div class="evidence-source"><span class="source-check">✓</span> TRACEABLE TO PROVIDED OUTPUT</div></article>
+                <article class="panel next-command"><div class="result-section-title"><span class="command-mark">›_</span><h3>Next diagnostic command</h3></div><code id="result-command">—</code></article>
+                <article class="panel safe-fix"><div class="result-section-title"><span class="fix-mark">◇</span><h3>Safe corrective action</h3></div><p id="result-fix">—</p><div class="safety-note"><span>ⓘ</span> Review and verify before applying any configuration change.</div></article>
+
+                <section class="review-section">
+                  <div class="review-heading"><div><span class="review-icon">✓</span><div><h3>Human review</h3><p>Record your decision for this diagnosis.</p></div></div><span class="review-required">REVIEW REQUIRED</span></div>
+                  <div class="review-options" role="group" aria-label="Reviewer decision">
+                    <button class="review-option selected" data-decision="Accepted" type="button"><span class="radio-dot"></span>Accept</button>
+                    <button class="review-option" data-decision="Edited" type="button"><span class="radio-dot"></span>Correct</button>
+                    <button class="review-option" data-decision="Rejected" type="button"><span class="radio-dot"></span>Reject</button>
+                  </div>
+                  <div id="correction-fields" class="correction-fields hidden"><label for="correction-category">CORRECT FAULT CATEGORY</label><select id="correction-category"></select><label for="review-reason">REVIEW NOTE <span>OPTIONAL</span></label><textarea id="review-reason" rows="3" placeholder="Add context about this correction…"></textarea></div>
+                  <button id="save-review" class="button button-secondary save-review" type="button"><span>✓</span> Save review</button>
+                  <div id="review-saved" class="review-saved hidden" role="status"></div>
+                </section>
+              </section>
+            </div>
+          </div>
+          <footer class="page-footer">NETSAGE AI IS A DECISION-SUPPORT SYSTEM. HUMAN REVIEW IS REQUIRED BEFORE ACCEPTING REMEDIATION.</footer>
+        </section>
+
+        <section id="dashboard-page" class="page hidden">
+          <div class="page-heading dashboard-heading">
+            <div><div class="eyebrow"><span class="eyebrow-line"></span> NETWORK OPERATIONS</div><h1>Operational analytics</h1><p class="page-subtitle">A measured view of diagnosis outcomes and human review.</p></div>
+            <button id="refresh-dashboard" class="button button-secondary" type="button"><span>↻</span> Refresh data</button>
+          </div>
+          <div class="metric-grid">
+            <article class="metric-card"><span class="metric-label">TOTAL CASES</span><strong id="metric-total">—</strong><small>Cases in reviewed dataset</small><span class="metric-symbol metric-blue">▤</span></article>
+            <article class="metric-card"><span class="metric-label">CORRECT DIAGNOSES</span><strong id="metric-correct">—</strong><small>Matches expected category</small><span class="metric-symbol metric-green">✓</span></article>
+            <article class="metric-card"><span class="metric-label">INCORRECT</span><strong id="metric-incorrect">—</strong><small>Requires closer review</small><span class="metric-symbol metric-red">!</span></article>
+            <article class="metric-card"><span class="metric-label">DATASET ACCURACY</span><strong id="metric-accuracy">—</strong><small>Correct diagnoses / all cases</small><span class="metric-symbol metric-purple">◔</span></article>
+          </div>
+          <div class="dashboard-charts">
+            <article class="panel chart-panel"><div class="chart-heading"><div><div class="result-kicker">FAULT DISTRIBUTION</div><h2>Cases by category</h2></div><span class="chart-unit">EXPECTED CATEGORY</span></div><div id="category-chart" class="bar-chart"></div></article>
+            <article class="panel chart-panel"><div class="chart-heading"><div><div class="result-kicker">EVALUATION QUALITY</div><h2>Diagnosis outcomes</h2></div><span class="chart-unit">ALL CASES</span></div><div id="status-chart" class="status-chart"></div></article>
+          </div>
+          <article class="panel table-panel"><div class="table-heading"><div><div class="result-kicker">CASE REVIEW</div><h2>Diagnosis records</h2></div><div class="table-controls"><select id="status-filter" aria-label="Filter by evaluation status"><option value="all">All outcomes</option><option>Correct</option><option>Incorrect</option><option>Needs Review</option></select><input id="case-search" type="search" placeholder="Search cases" aria-label="Search cases" /></div></div><div class="table-scroll"><table><thead><tr><th>CASE</th><th>ISSUE</th><th>SEVERITY</th><th>EXPECTED CATEGORY</th><th>MODEL CATEGORY</th><th>OUTCOME</th></tr></thead><tbody id="case-table-body"></tbody></table></div></article>
+          <article class="panel corrections-panel"><div class="chart-heading"><div><div class="result-kicker">HUMAN IN THE LOOP</div><h2>Correction log</h2></div><span id="correction-count" class="tag tag-neutral">0 CORRECTIONS</span></div><div id="corrections-content" class="corrections-content"></div></article>
+          <footer class="page-footer">NETSAGE AI IS A DECISION-SUPPORT SYSTEM. HUMAN REVIEW IS REQUIRED BEFORE ACCEPTING REMEDIATION.</footer>
+        </section>
+      </main>
+    </div>
+    <script src="/static/app.js" defer></script>
+  </body>
+</html>

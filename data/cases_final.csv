@@ -1,0 +1,250 @@
+case_id,issue_type,symptom,topology_note,show_command,show_command_output,expected_fault,osi_layer,concept,severity,packet_tracer_file,verification_command,verification_result,ai_root_cause,ai_confidence,ai_evidence,ai_next_command,ai_fix_steps,human_decision,human_correction,verification_status,evidence_source,evaluation_score,evaluation_status,expected_category,ai_fault_category,ai_predicted_category,rule_predicted_category
+C001,VLAN / Trunk,"PC1 can reach its own gateway at 192.168.10.1 and the VLAN 20 gateway at 192.168.20.1, but cannot reach PC2 at 192.168.20.10.",R1 router-on-a-stick connected to SW1 through Gi0/0-Gi0/1. PC1 is in VLAN 10 (192.168.10.10/24). PC2 is in VLAN 20 (192.168.20.10/24). R1 Gi0/0.10 is 192.168.10.1/24 and Gi0/0.20 is 192.168.20.1/24.,show interfaces trunk; show vlan brief; show interfaces gigabitEthernet 0/1 switchport,show interfaces trunk: Gi0/1 is trunking using 802.1Q; Vlans allowed on trunk: 10; Vlans allowed and active: 10; Vlans forwarding and not pruned: 10. show vlan brief: VLAN 20 SERVERS is active on Fa0/2. show interfaces Gi0/1 switchport: Administrative Mode trunk; Operational Mode trunk; dot1q; Trunking VLANs Enabled: 10.,VLAN 20 is excluded from the allowed VLAN list on the SW1 Gi0/1 trunk.,Layer 2 — Data Link,802.1Q trunk VLAN propagation,High,NetSage_C001_VLAN20_TrunkFault.pkt,ping 192.168.20.10,"After correction: Sent=4, Received=4, Lost=0%, Average=0ms.",VLAN 20 is not allowed on the trunk interface Gi0/1.,1.0,"show interfaces trunk shows Gi0/1 is trunking with VLANs allowed: 10, but VLAN 20 is not allowed.",show interfaces trunk,Add VLAN 20 to the allowed VLANs on Gi0/1.,,,VERIFIED,,1.0,Correct,TRUNK_VLAN,TRUNK_VLAN,,
+C002,Gateway,PC2 has an IP address but cannot reach its default gateway.,PC2 is in VLAN 20 with address 192.168.20.10/24.,show ip interface brief,R1 Gi0/0.20 is up/up with 192.168.20.1.,PC2 has an incorrect default gateway.,Layer 3 — Network,Default gateway,High,,ping 192.168.20.1,Expected successful replies after correcting gateway.,Incorrect default gateway configuration on PC2,1.0,"PC2 has an IP address but cannot reach its default gateway. R1 Gi0/0.20 is up/up with 192.168.20.1, which is likely the correct gateway for VLAN 20.",ping 192.168.20.1 from PC2,Verify and set the default gateway on PC2 to 192.168.20.1.,,,NOT_REVIEWED,synthetic_lab_scenario,1.0,Correct,DEFAULT_GATEWAY,DEFAULT_GATEWAY,,
+C003,IP Addressing,PC1 cannot communicate with hosts in its local subnet.,PC1 is connected to SW1 Fa0/1 in VLAN 10.,ipconfig; ping 192.168.10.1; ping 192.168.10.20,"PC1 ipconfig:
+IPv4 Address: 192.168.10.10
+Subnet Mask: 255.255.0.0
+Default Gateway: 192.168.10.1
+
+Ping 192.168.10.1:
+4 packets sent, 4 received, 0% loss.
+
+Ping 192.168.10.20:
+4 packets sent, 0 received, 100% loss.",PC1 has an incorrect subnet mask.,Layer 3 — Network,IPv4 subnet mask,Medium,,ping 192.168.10.1,Expected successful gateway ping after correcting mask.,Incorrect IP address configuration,1.0,"PC1 has an IP address 192.168.10.10 with a subnet mask of 255.255.0.0, which is not compatible with the subnet containing 192.168.10.1 and 192.168.10.20.",show ip interface brief,Correct the subnet mask to 255.255.255.0 on PC1.,Edited,SUBNET_MASK,Human verified,Diagnostic evidence reviewed by human,1.0,Correct,SUBNET_MASK,SUBNET_MASK,IP_ADDRESS,SUBNET_MASK
+C004,VLAN,A workstation cannot reach other hosts in its expected VLAN.,PC1 is connected to SW1 Fa0/1 and should belong to VLAN 10.,show vlan brief,Fa0/1 is assigned to VLAN 20 instead of VLAN 10.,Access port is assigned to the wrong VLAN.,Layer 2 — Data Link,Access VLAN assignment,High,,ping 192.168.10.1,Expected successful connectivity after moving Fa0/1 to VLAN 10.,Interface Fa0/1 is incorrectly assigned to VLAN 20 instead of VLAN 10.,1.0,show vlan brief indicates Fa0/1 is assigned to VLAN 20 instead of VLAN 10.,show running-config interface Fa0/1,Assign Fa0/1 to VLAN 10 using the command: switchport access vlan 10.,,,NOT_REVIEWED,synthetic_lab_scenario,1.0,Correct,VLAN_ASSIGNMENT,VLAN_ASSIGNMENT,,
+C005,Interface,A connected PC cannot communicate with the network.,PC1 connects to SW1 Fa0/1.,show interfaces status,Fa0/1 is administratively down.,The switch access interface is shutdown.,Layer 1 — Physical,Interface administrative state,High,,show interfaces status,Expected Fa0/1 connected after enabling the interface.,Interface is administratively down,1.0,Fa0/1 is administratively down,show running-config interface Fa0/1,Enable the interface using the command `no shutdown` on Fa0/1.,,,NOT_REVIEWED,synthetic_lab_scenario,1.0,Correct,INTERFACE_SHUTDOWN,INTERFACE_SHUTDOWN,,
+C006,Trunk,Hosts in one VLAN cannot reach the router while another VLAN works.,SW1 Gi0/1 connects to R1 Gi0/0 using router-on-a-stick.,show interfaces trunk,Gi0/1 is trunking but VLAN 20 is absent from allowed VLANs.,Required VLAN is missing from the trunk allowed list.,Layer 2 — Data Link,802.1Q trunking,High,,ping 192.168.20.10,Expected successful connectivity after allowing VLAN 20.,VLAN 20 is not allowed on the trunk interface Gi0/1.,1.0,Gi0/1 is trunking but VLAN 20 is absent from allowed VLANs.,show running-config interface Gi0/1,Add VLAN 20 to the allowed VLANs on Gi0/1.,,,NOT_REVIEWED,synthetic_lab_scenario,1.0,Correct,TRUNK_VLAN,TRUNK_VLAN,,
+C007,Routing,A remote network is unreachable although local connectivity works.,R1 has a directly connected LAN and a remote routed network.,show ip route,No route exists for the remote destination network.,Required static route is missing.,Layer 3 — Network,Static routing,High,,show ip route,Expected remote route to appear after configuration.,Missing static route to the remote network,1.0,No route exists for the remote destination network,show ip route,Add a static route to the remote network using the 'ip route' command.,,,NOT_REVIEWED,synthetic_lab_scenario,1.0,Correct,STATIC_ROUTE,STATIC_ROUTE,,
+C008,DHCP,A client receives no usable IPv4 address from DHCP.,Client is connected to a LAN served by a Cisco DHCP pool.,show ip dhcp pool,DHCP pool exists but the configured network does not match the client LAN.,DHCP pool network is incorrectly configured.,Layer 3 — Network,DHCP addressing,High,,show ip dhcp binding,Expected client lease after correcting the pool.,Incorrectly configured network in DHCP pool,1.0,DHCP pool exists but the configured network does not match the client LAN.,show ip dhcp binding,Correct the network configuration in the DHCP pool to match the client LAN.,,,NOT_REVIEWED,synthetic_lab_scenario,1.0,Correct,DHCP,DHCP,,
+C009,DNS,A client can ping an IP address but cannot resolve a hostname.,Client has network connectivity to the DNS server.,ipconfig /all,DNS server address is missing or incorrect.,Incorrect DNS server configuration on the client.,Layer 7 — Application,DNS resolution,Medium,,nslookup server.example,Expected successful name resolution after correcting DNS.,Incorrect or missing DNS server configuration,1.0,DNS server address is missing or incorrect,nslookup,Configure the correct DNS server address on the client or router.,,,NOT_REVIEWED,synthetic_lab_scenario,1.0,Correct,DNS,DNS,,
+C010,ACL,A host can reach the gateway but traffic to a permitted server is blocked.,R1 routes traffic between the client and server networks.,show access-lists,ACL contains a deny entry matching the server traffic.,ACL rule incorrectly blocks required traffic.,Layer 3/4,Access control lists,High,,show access-lists,Expected permitted traffic after correcting ACL.,Deny rule in ACL blocking server traffic,1.0,ACL contains a deny entry matching the server traffic.,show running-config access-list,Remove or modify the deny entry in the ACL to allow traffic to the permitted server.,,,NOT_REVIEWED,synthetic_lab_scenario,1.0,Correct,ACL,ACL,,
+C011,NAT,Inside hosts can reach the gateway but cannot reach an external network.,R1 connects an inside LAN to an outside interface.,show ip nat translations,No translations are created for inside hosts.,NAT configuration is missing or incorrectly matched.,Layer 3 — Network,Network address translation,High,,show ip nat translations,Expected translations after correcting NAT.,NAT is not translating inside hosts' traffic to outside addresses,1.0,No translations are created for inside hosts,show running-config interface GigabitEthernet0/1,Configure NAT to translate inside hosts' private IP addresses to public IP addresses on the outside interface.,,,NOT_REVIEWED,synthetic_lab_scenario,1.0,Correct,NAT,NAT,,
+C012,Wireless,Wireless client associates with the AP but cannot reach the internal network.,Wireless client connects through an access point to the LAN.,show vlan brief,Wireless-facing VLAN mapping does not match the intended client VLAN.,Wireless VLAN mapping is incorrect.,Layer 2 — Data Link,Wireless VLAN mapping,High,,ping 192.168.30.1,Expected successful gateway connectivity after correcting VLAN mapping.,Wireless client is assigned to the wrong VLAN.,1.0,Wireless-facing VLAN mapping does not match the intended client VLAN.,show running-config interface <AP_INTERFACE>,Correct the VLAN assignment for the wireless interface to match the intended client VLAN.,,,NOT_REVIEWED,synthetic_lab_scenario,1.0,Correct,VLAN_ASSIGNMENT,VLAN_ASSIGNMENT,,
+C014,Gateway,PC2 has an IP address but cannot reach its default gateway. Variant 1: the affected service is intermittent.,PC2 is in VLAN 20 with address 192.168.20.10/24.,show ip interface brief,R1 Gi0/0.20 is up/up with 192.168.20.1.,PC2 has an incorrect default gateway.,Layer 3 — Network,Default gateway,Medium,,ping 192.168.20.1,Expected successful replies after correcting gateway.,Incorrect default gateway configuration,0.9,"PC2 has an IP address but cannot reach its default gateway, and the interface on R1 for VLAN 20 is up but the default gateway is not reachable.",ping 192.168.20.1,Verify and correct the default gateway configuration on PC2.,,,NOT_REVIEWED,synthetic_lab_scenario,1.0,Correct,DEFAULT_GATEWAY,DEFAULT_GATEWAY,,
+C015,IP Addressing,PC1 cannot communicate with hosts in its local subnet. Variant 1: the affected service is intermittent.,PC1 is connected to SW1 Fa0/1 in VLAN 10.,ipconfig; ping 192.168.10.1; ping 192.168.10.20,"PC1 ipconfig:
+IPv4 Address: 192.168.10.10
+Subnet Mask: 255.255.0.0
+Default Gateway: 192.168.10.1
+
+Ping 192.168.10.1:
+4 packets sent, 4 received, 0% loss.
+
+Ping 192.168.10.20:
+4 packets sent, 0 received, 100% loss.",PC1 has an incorrect subnet mask.,Layer 3 — Network,IPv4 subnet mask,Low,,ping 192.168.10.1,Expected successful gateway ping after correcting mask.,Incorrect IP address configuration,1.0,"PC1 has an IP address of 192.168.10.10 with a subnet mask of 255.255.0.0, which is not compatible with the target IP 192.168.10.20.",arp -a,Verify and correct the IP address and subnet mask configuration on PC1 to ensure compatibility with the local subnet.,Edited,SUBNET_MASK,Human verified,Diagnostic evidence reviewed by human,1.0,Correct,SUBNET_MASK,SUBNET_MASK,IP_ADDRESS,SUBNET_MASK
+C016,VLAN,A workstation cannot reach other hosts in its expected VLAN. Variant 1: the affected service is intermittent.,PC1 is connected to SW1 Fa0/1 and should belong to VLAN 10.,show vlan brief,Fa0/1 is assigned to VLAN 20 instead of VLAN 10.,Access port is assigned to the wrong VLAN.,Layer 2 — Data Link,Access VLAN assignment,Medium,,ping 192.168.10.1,Expected successful connectivity after moving Fa0/1 to VLAN 10.,Interface Fa0/1 is incorrectly assigned to VLAN 20 instead of VLAN 10,1.0,Fa0/1 is assigned to VLAN 20 instead of VLAN 10,show running-config interface Fa0/1,Assign Fa0/1 to VLAN 10 using the command: switchport access vlan 10,,,NOT_REVIEWED,synthetic_lab_scenario,1.0,Correct,VLAN_ASSIGNMENT,VLAN_ASSIGNMENT,,
+C017,Interface,A connected PC cannot communicate with the network. Variant 1: the affected service is intermittent.,PC1 connects to SW1 Fa0/1.,show interfaces status,Fa0/1 is administratively down.,The switch access interface is shutdown.,Layer 1 — Physical,Interface administrative state,Medium,,show interfaces status,Expected Fa0/1 connected after enabling the interface.,Interface is administratively down,1.0,Fa0/1 is administratively down,show running-config interface Fa0/1,Enable the interface using the command `no shutdown` on Fa0/1.,,,NOT_REVIEWED,synthetic_lab_scenario,1.0,Correct,INTERFACE_SHUTDOWN,INTERFACE_SHUTDOWN,,
+C018,Trunk,Hosts in one VLAN cannot reach the router while another VLAN works. Variant 1: the affected service is intermittent.,SW1 Gi0/1 connects to R1 Gi0/0 using router-on-a-stick.,show interfaces trunk,Gi0/1 is trunking but VLAN 20 is absent from allowed VLANs.,Required VLAN is missing from the trunk allowed list.,Layer 2 — Data Link,802.1Q trunking,Medium,,ping 192.168.20.10,Expected successful connectivity after allowing VLAN 20.,VLAN 20 is not allowed on the trunk interface Gi0/1.,1.0,Gi0/1 is trunking but VLAN 20 is absent from allowed VLANs.,show running-config interface Gi0/1,Add VLAN 20 to the allowed VLANs on Gi0/1.,,,NOT_REVIEWED,synthetic_lab_scenario,1.0,Correct,TRUNK_VLAN,TRUNK_VLAN,,
+C019,Routing,A remote network is unreachable although local connectivity works. Variant 1: the affected service is intermittent.,R1 has a directly connected LAN and a remote routed network.,show ip route,No route exists for the remote destination network.,Required static route is missing.,Layer 3 — Network,Static routing,Medium,,show ip route,Expected remote route to appear after configuration.,Missing static route to the remote network,1.0,No route exists for the remote destination network,show ip route,Add a static route to the remote network using the 'ip route' command.,,,NOT_REVIEWED,synthetic_lab_scenario,1.0,Correct,STATIC_ROUTE,STATIC_ROUTE,,
+C020,DHCP,A client receives no usable IPv4 address from DHCP. Variant 1: the affected service is intermittent.,Client is connected to a LAN served by a Cisco DHCP pool.,show ip dhcp pool,DHCP pool exists but the configured network does not match the client LAN.,DHCP pool network is incorrectly configured.,Layer 3 — Network,DHCP addressing,Medium,,show ip dhcp binding,Expected client lease after correcting the pool.,Incorrectly configured DHCP network address,1.0,DHCP pool exists but the configured network does not match the client LAN.,show ip dhcp binding,Correct the DHCP pool network address to match the client LAN.,,,NOT_REVIEWED,synthetic_lab_scenario,1.0,Correct,DHCP,DHCP,,
+C021,DNS,A client can ping an IP address but cannot resolve a hostname. Variant 1: the affected service is intermittent.,Client has network connectivity to the DNS server.,ipconfig /all,DNS server address is missing or incorrect.,Incorrect DNS server configuration on the client.,Layer 7 — Application,DNS resolution,Low,,nslookup server.example,Expected successful name resolution after correcting DNS.,Incorrect or missing DNS server configuration,1.0,DNS server address is missing or incorrect,nslookup,Configure the correct DNS server address on the client or router.,,,NOT_REVIEWED,synthetic_lab_scenario,1.0,Correct,DNS,DNS,,
+C022,ACL,A host can reach the gateway but traffic to a permitted server is blocked. Variant 1: the affected service is intermittent.,R1 routes traffic between the client and server networks.,show access-lists,ACL contains a deny entry matching the server traffic.,ACL rule incorrectly blocks required traffic.,Layer 3/4,Access control lists,Medium,,show access-lists,Expected permitted traffic after correcting ACL.,Deny rule in ACL blocking server traffic,1.0,ACL contains a deny entry matching the server traffic.,show running-config access-list,Remove or modify the deny entry in the ACL to allow traffic to the permitted server.,,,NOT_REVIEWED,synthetic_lab_scenario,1.0,Correct,ACL,ACL,,
+C023,NAT,Inside hosts can reach the gateway but cannot reach an external network. Variant 1: the affected service is intermittent.,R1 connects an inside LAN to an outside interface.,show ip nat translations,No translations are created for inside hosts.,NAT configuration is missing or incorrectly matched.,Layer 3 — Network,Network address translation,Medium,,show ip nat translations,Expected translations after correcting NAT.,NAT is not translating inside hosts' traffic to outside addresses,1.0,No translations are created for inside hosts,show running-config interface GigabitEthernet0/1,Configure NAT to translate inside hosts' private IP addresses to public IP addresses on the outside interface.,,,NOT_REVIEWED,synthetic_lab_scenario,1.0,Correct,NAT,NAT,,
+C024,Wireless,Wireless client associates with the AP but cannot reach the internal network. Variant 1: the affected service is intermittent.,Wireless client connects through an access point to the LAN.,show vlan brief,Wireless-facing VLAN mapping does not match the intended client VLAN.,Wireless VLAN mapping is incorrect.,Layer 2 — Data Link,Wireless VLAN mapping,Medium,,ping 192.168.30.1,Expected successful gateway connectivity after correcting VLAN mapping.,Wireless client is assigned to the wrong VLAN.,1.0,Wireless-facing VLAN mapping does not match the intended client VLAN.,show running-config interface <AP_INTERFACE>,Correct the VLAN assignment for the wireless client or ensure the AP is configured to use the correct VLAN.,,,NOT_REVIEWED,synthetic_lab_scenario,1.0,Correct,VLAN_ASSIGNMENT,VLAN_ASSIGNMENT,,
+C026,Gateway,PC2 has an IP address but cannot reach its default gateway. Variant 2: the affected service is intermittent.,PC2 is in VLAN 20 with address 192.168.20.10/24.,show ip interface brief,R1 Gi0/0.20 is up/up with 192.168.20.1.,PC2 has an incorrect default gateway.,Layer 3 — Network,Default gateway,Medium,,ping 192.168.20.1,Expected successful replies after correcting gateway.,Incorrect default gateway configuration,0.9,"PC2 has an IP address but cannot reach its default gateway, and the interface on R1 for VLAN 20 is up but the default gateway is not reachable.",ping 192.168.20.1,Verify and correct the default gateway configuration on PC2.,,,NOT_REVIEWED,synthetic_lab_scenario,1.0,Correct,DEFAULT_GATEWAY,DEFAULT_GATEWAY,,
+C027,IP Addressing,PC1 cannot communicate with hosts in its local subnet. Variant 2: the affected service is intermittent.,PC1 is connected to SW1 Fa0/1 in VLAN 10.,ipconfig; ping 192.168.10.1,"PC1 ipconfig:
+IPv4 Address: 192.168.10.10
+Subnet Mask: 255.255.0.0
+Default Gateway: 192.168.10.1
+
+Ping 192.168.10.1:
+4 packets sent, 4 received, 0% loss.",PC1 has an incorrect subnet mask.,Layer 3 — Network,IPv4 subnet mask,Low,,ping 192.168.10.1,Expected successful gateway ping after correcting mask.,Incorrectly configured default gateway,1.0,"Ping to 192.168.10.1 succeeds, indicating the default gateway is reachable, but PC1 cannot communicate with other hosts in the local subnet.",show ip route,Verify and correct the default gateway configuration on PC1 to ensure it matches the subnet and routing requirements.,Edited,SUBNET_MASK,Human verified,Diagnostic evidence reviewed by human,1.0,Correct,SUBNET_MASK,SUBNET_MASK,DEFAULT_GATEWAY,SUBNET_MASK
+C028,VLAN,A workstation cannot reach other hosts in its expected VLAN. Variant 2: the affected service is intermittent.,PC1 is connected to SW1 Fa0/1 and should belong to VLAN 10.,show vlan brief,Fa0/1 is assigned to VLAN 20 instead of VLAN 10.,Access port is assigned to the wrong VLAN.,Layer 2 — Data Link,Access VLAN assignment,Medium,,ping 192.168.10.1,Expected successful connectivity after moving Fa0/1 to VLAN 10.,Interface Fa0/1 is incorrectly assigned to VLAN 20 instead of VLAN 10.,1.0,show vlan brief indicates Fa0/1 is assigned to VLAN 20 instead of VLAN 10.,show running-config interface Fa0/1,Assign Fa0/1 to VLAN 10 using the command: switchport access vlan 10.,,,NOT_REVIEWED,synthetic_lab_scenario,1.0,Correct,VLAN_ASSIGNMENT,VLAN_ASSIGNMENT,,
+C029,Interface,A connected PC cannot communicate with the network. Variant 2: the affected service is intermittent.,PC1 connects to SW1 Fa0/1.,show interfaces status,Fa0/1 is administratively down.,The switch access interface is shutdown.,Layer 1 — Physical,Interface administrative state,Medium,,show interfaces status,Expected Fa0/1 connected after enabling the interface.,Interface is administratively down,1.0,Fa0/1 is administratively down,show running-config interface Fa0/1,Enable the interface using the command `no shutdown` on Fa0/1.,,,NOT_REVIEWED,synthetic_lab_scenario,1.0,Correct,INTERFACE_SHUTDOWN,INTERFACE_SHUTDOWN,,
+C030,Trunk,Hosts in one VLAN cannot reach the router while another VLAN works. Variant 2: the affected service is intermittent.,SW1 Gi0/1 connects to R1 Gi0/0 using router-on-a-stick.,show interfaces trunk,Gi0/1 is trunking but VLAN 20 is absent from allowed VLANs.,Required VLAN is missing from the trunk allowed list.,Layer 2 — Data Link,802.1Q trunking,Medium,,ping 192.168.20.10,Expected successful connectivity after allowing VLAN 20.,VLAN 20 is not allowed on the trunk interface Gi0/1.,1.0,Gi0/1 is trunking but VLAN 20 is absent from allowed VLANs.,show running-config interface Gi0/1,Add VLAN 20 to the allowed VLANs on Gi0/1.,,,NOT_REVIEWED,synthetic_lab_scenario,1.0,Correct,TRUNK_VLAN,TRUNK_VLAN,,
+C031,Routing,A remote network is unreachable although local connectivity works. Variant 2: the affected service is intermittent.,R1 has a directly connected LAN and a remote routed network.,show ip route,No route exists for the remote destination network.,Required static route is missing.,Layer 3 — Network,Static routing,Medium,,show ip route,Expected remote route to appear after configuration.,Missing static route to the remote network,1.0,No route exists for the remote destination network,show ip route,Add a static route to the remote network using the 'ip route' command.,,,NOT_REVIEWED,synthetic_lab_scenario,1.0,Correct,STATIC_ROUTE,STATIC_ROUTE,,
+C032,DHCP,A client receives no usable IPv4 address from DHCP. Variant 2: the affected service is intermittent.,Client is connected to a LAN served by a Cisco DHCP pool.,show ip dhcp pool,DHCP pool exists but the configured network does not match the client LAN.,DHCP pool network is incorrectly configured.,Layer 3 — Network,DHCP addressing,Medium,,show ip dhcp binding,Expected client lease after correcting the pool.,Incorrectly configured DHCP pool network,1.0,DHCP pool exists but the configured network does not match the client LAN,show ip dhcp binding,Correct the DHCP pool network to match the client LAN subnet.,,,NOT_REVIEWED,synthetic_lab_scenario,1.0,Correct,DHCP,DHCP,,
+C033,,VLAN 10 PC cannot obtain a valid DHCP address.,PC is connected to VLAN 10. Router provides VLAN 10 gateway 192.168.10.1.,show ip dhcp pool; ipconfig; ipconfig /renew,"Router DHCP pool:
+Pool VLAN10 uses network 192.168.20.0/24.
+VLAN 10 gateway/network is 192.168.10.1 / 192.168.10.0/24.
+
+VLAN 10 PC ipconfig:
+IPv4 Address: 169.254.145.230
+Subnet Mask: 255.255.0.0
+Default Gateway: 0.0.0.0
+
+DHCP renewal:
+DHCP request failed.",DHCP pool network is incorrectly configured.,,,,,,,DHCP server is not assigning addresses in the correct subnet,1.0,"Router DHCP pool is configured for 192.168.20.0/24, but VLAN 10 PC is expecting 192.168.10.0/24. DHCP request failed.",show ip dhcp binding,Correct the DHCP pool subnet to match the VLAN 10 network (192.168.10.0/24).,,,,,1.0,Correct,DHCP,DHCP,DHCP,DHCP
+C034,,PC1 cannot resolve DNS names.,PC1 is connected to the 192.168.10.0/24 network with gateway 192.168.10.1.,ipconfig; nslookup example.com,"PC1 IP Configuration:
+IPv4 Address: 192.168.10.10
+Subnet Mask: 255.255.255.0
+Default Gateway: 192.168.10.1
+DNS Server: 192.168.10.254
+
+DNS test:
+nslookup example.com
+
+Server: 192.168.10.254
+DNS request timed out.
+Request to 192.168.10.254 timed-out.",Incorrect DNS server configuration on the client.,,,,,,,DNS server unreachable,1.0,nslookup example.com timed out when attempting to contact DNS server 192.168.10.254,ping 192.168.10.254,Verify DNS server connectivity and configuration. Check if the DNS server is reachable and properly configured.,,,,,1.0,Correct,DNS,DNS,DNS,DNS
+C035,,PC1 cannot reach its VLAN 10 gateway.,PC1 uses 192.168.10.10/24 with gateway 192.168.10.1.,show vlan brief; ipconfig; ping 192.168.10.1; ping 192.168.20.1,"Switch show vlan brief:
+VLAN 10 STUDENTS has no Fa0/1.
+VLAN 20 SERVERS has Fa0/1 and Fa0/2.
+
+PC1 ipconfig:
+IPv4 Address: 192.168.10.10
+Subnet Mask: 255.255.255.0
+Default Gateway: 192.168.10.1
+
+Ping 192.168.10.1:
+4 packets sent, 0 received, 100% loss.
+
+Ping 192.168.20.1:
+4 packets sent, 0 received, 100% loss.",Access port is assigned to the wrong VLAN.,,,,,,,PC1 is not assigned to VLAN 10,1.0,"Switch show vlan brief indicates VLAN 10 STUDENTS has no Fa0/1, implying PC1 is not in VLAN 10.",show interfaces Fa0/1 switchport,Assign Fa0/1 to VLAN 10 on the switch.,,,,,1.0,Correct,VLAN_ASSIGNMENT,VLAN_ASSIGNMENT,VLAN_ASSIGNMENT,VLAN_ASSIGNMENT
+C036,,PC1 can reach the local gateway but cannot communicate with the server.,PC1 is in VLAN 10. The server is in VLAN 20. The router provides inter-VLAN connectivity.,ipconfig; ping 192.168.10.1; ping 192.168.20.10; show ip route,"PC1 ipconfig:
+IPv4 Address: 192.168.10.10
+Subnet Mask: 255.255.255.0
+Default Gateway: 192.168.10.1
+
+Ping 192.168.10.1:
+4 packets sent, 4 received, 0% loss.
+
+Ping 192.168.20.10:
+4 packets sent, 0 received, 100% loss.
+
+Router show ip route:
+C 192.168.10.0/24 is directly connected, GigabitEthernet0/0.10
+C 192.168.20.0/24 is directly connected, GigabitEthernet0/0.20",ACL rule incorrectly blocks required inter-VLAN traffic.,,,,,,,Incorrect VLAN assignment for the server or PC1,1.0,"PC1 can reach its local gateway (VLAN 10) but cannot reach the server in VLAN 20, and the router has correct VLAN interfaces configured.",show running-config interface GigabitEthernet0/0,"Verify and ensure that PC1 is in VLAN 10 and the server is in VLAN 20, and that inter-VLAN routing is properly configured.",Edited,ACL,Human verified,Diagnostic evidence reviewed by human,0.0,Incorrect,ACL,VLAN_ASSIGNMENT,VLAN_ASSIGNMENT,OTHER
+C037,,PC1 can reach the gateway but DNS name resolution fails.,PC1 is correctly configured in VLAN 10. The DNS server is reachable through the network.,ipconfig; ping 192.168.10.1; ping 192.168.10.53; nslookup example.com,"PC1 ipconfig:
+IPv4 Address: 192.168.10.10
+Subnet Mask: 255.255.255.0
+Default Gateway: 192.168.10.1
+DNS Server: 192.168.10.53
+
+Ping 192.168.10.1:
+4 packets sent, 4 received, 0% loss.
+
+Ping 192.168.10.53:
+4 packets sent, 4 received, 0% loss.
+
+nslookup example.com:
+Server: 192.168.10.53
+DNS request timed out.",DNS server is reachable but DNS service is not responding.,,,,,,,DNS server is unreachable or not responding,1.0,nslookup example.com resulted in a DNS request timeout despite the DNS server being reachable.,nslookup google.com,"Verify DNS server configuration and connectivity, and ensure the DNS server is operational.",,,,,1.0,Correct,DNS,DNS,DNS,DNS
+C038,,PC2 can reach its gateway but cannot communicate with hosts in VLAN 10.,PC2 is correctly configured in VLAN 20. Inter-VLAN router interfaces are up.,ipconfig; ping 192.168.20.1; ping 192.168.10.10; show ip interface brief; show access-lists,"PC2 ipconfig:
+IPv4 Address: 192.168.20.10
+Subnet Mask: 255.255.255.0
+Default Gateway: 192.168.20.1
+
+Ping 192.168.20.1:
+4 packets sent, 4 received, 0% loss.
+
+Ping 192.168.10.10:
+4 packets sent, 0 received, 100% loss.
+
+Router show ip interface brief:
+GigabitEthernet0/0.10  192.168.10.1  up  up
+GigabitEthernet0/0.20  192.168.20.1  up  up
+
+Router show access-lists:
+Extended IP access list BLOCK_VLAN20
+10 deny ip 192.168.20.0 0.0.0.255 192.168.10.0 0.0.0.255
+20 permit ip any any",ACL rule incorrectly blocks required inter-VLAN traffic.,,,,,,,Traffic from VLAN 20 is being blocked by the ACL,1.0,"The ACL ""BLOCK_VLAN20"" explicitly denies traffic between 192.168.20.0/24 and 192.168.10.0/24, preventing communication between VLAN 20 and VLAN 10.",show access-lists,Remove or modify the ACL entry denying traffic between VLAN 20 and VLAN 10.,,,,,1.0,Correct,ACL,ACL,ACL,ACL
+C039,,PC1 has the correct IP address but cannot communicate with another host in VLAN 10.,PC1 and PC2 are intended to be in the same 192.168.10.0/24 VLAN.,ipconfig; ping 192.168.10.1; ping 192.168.10.20,"PC1 ipconfig:
+IPv4 Address: 192.168.10.10
+Subnet Mask: 255.255.0.0
+Default Gateway: 192.168.10.1
+
+PC2:
+IPv4 Address: 192.168.10.20
+Subnet Mask: 255.255.255.0
+
+Ping 192.168.10.1:
+4 packets sent, 4 received, 0% loss.
+
+Ping 192.168.10.20:
+4 packets sent, 0 received, 100% loss.
+
+Network configuration:
+VLAN 10 uses network 192.168.10.0/24.
+PC1 IP address 192.168.10.10 is correct for VLAN 10.
+PC1 subnet mask is configured as 255.255.0.0 instead of 255.255.255.0.",PC1 has an incorrect subnet mask.,,,,,,,Incorrect subnet mask on PC1,1.0,"PC1's subnet mask is 255.255.0.0 instead of 255.255.255.0, causing incorrect network segmentation.",show ip interface brief,Change PC1's subnet mask to 255.255.255.0.,,,,,1.0,Correct,SUBNET_MASK,SUBNET_MASK,SUBNET_MASK,OTHER
+C040,,PC1 can reach its default gateway but cannot reach the remote 192.168.30.0/24 network.,"PC1 is correctly configured in VLAN 10. The local gateway is reachable, but the remote network is not present in the routing table.",ipconfig; ping 192.168.10.1; ping 192.168.30.10; show ip route,"PC1 ipconfig:
+IPv4 Address: 192.168.10.10
+Subnet Mask: 255.255.255.0
+Default Gateway: 192.168.10.1
+
+Ping 192.168.10.1:
+4 packets sent, 4 received, 0% loss.
+
+Ping 192.168.30.10:
+4 packets sent, 0 received, 100% loss.
+
+Router show ip route:
+C 192.168.10.0/24 is directly connected, GigabitEthernet0/0.10
+C 192.168.20.0/24 is directly connected, GigabitEthernet0/0.20
+No route to 192.168.30.0/24 is present.
+
+Router configuration:
+The local VLAN interfaces are up and reachable.
+The default gateway for PC1 is 192.168.10.1 and responds successfully.",Required static route is missing.,,,,,,,Missing static route to the 192.168.30.0/24 network,1.0,"The remote network 192.168.30.0/24 is not present in the routing table, and pings to 192.168.30.10 fail.",show ip route static,Add a static route to 192.168.30.0/24 via the appropriate next-hop address.,,,,,1.0,Correct,STATIC_ROUTE,STATIC_ROUTE,STATIC_ROUTE,OTHER
+C041,,PC1 cannot communicate with the remote network even though its local gateway is reachable.,"PC1 is correctly configured in VLAN 10. The local gateway is reachable, but the remote network is unavailable.",ipconfig; ping 192.168.10.1; ping 192.168.40.10; show ip route,"PC1 ipconfig:
+IPv4 Address: 192.168.10.10
+Subnet Mask: 255.255.255.0
+Default Gateway: 192.168.10.1
+
+Ping 192.168.10.1:
+4 packets sent, 4 received, 0% loss.
+
+Ping 192.168.40.10:
+4 packets sent, 0 received, 100% loss.
+
+Router show ip route:
+C 192.168.10.0/24 is directly connected, GigabitEthernet0/0.10
+C 192.168.20.0/24 is directly connected, GigabitEthernet0/0.20
+No route to 192.168.40.0/24 is present.",Required static route is missing.,,,,,,,Missing static route to the remote network,1.0,"The router's routing table does not have a route to 192.168.40.0/24, and the ping to 192.168.40.10 fails.",show ip route 192.168.40.0,Add a static route to 192.168.40.0/24 via the appropriate interface or next-hop.,,,,,1.0,Correct,STATIC_ROUTE,STATIC_ROUTE,STATIC_ROUTE,OTHER
+C042,NAT,PC1 can reach the router but cannot access the Internet through the NAT-enabled router.,PC1 is in the inside LAN 192.168.10.0/24. The router has an outside interface connected to the ISP. The inside interface is reachable.,ipconfig; ping 192.168.10.1; ping 8.8.8.8; show ip route; show ip nat translations,"PC1 ipconfig:
+IPv4 Address: 192.168.10.10
+Subnet Mask: 255.255.255.0
+Default Gateway: 192.168.10.1
+
+Ping 192.168.10.1:
+4 packets sent, 4 received, 0% loss.
+
+Ping 8.8.8.8:
+4 packets sent, 0 received, 100% loss.
+
+Router show ip route:
+C 192.168.10.0/24 is directly connected, GigabitEthernet0/0
+S* 0.0.0.0/0 is directly connected, GigabitEthernet0/1
+
+Router show ip nat translations:
+No translations present.
+
+Router NAT configuration contains an inside interface and an outside interface,
+but the inside source network is not being translated.",NAT configuration is missing or incorrectly matched.,Network,Network Address Translation,High,N/A - synthetic test case,show ip nat translations,No NAT translations are created for inside host traffic.,Inside source network is not being translated,1.0,"show ip nat translations shows no translations present, and the inside source network is not being translated",show running-config interface GigabitEthernet0/1,Configure NAT translation for the inside source network on the outside interface.,,,,Synthetic lab scenario,1.0,Correct,NAT,NAT,NAT,OTHER
+C043,ACL,PC1 can reach its VLAN 10 gateway but cannot communicate with the server in VLAN 20.,PC1 is connected to VLAN 10 and the server is connected to VLAN 20. Router-on-a-stick provides inter-VLAN routing.,ipconfig; ping 192.168.10.1; ping 192.168.20.10; show ip interface GigabitEthernet0/0.10; show running-config,"PC1:
+IPv4 Address: 192.168.10.10
+Subnet Mask: 255.255.255.0
+Default Gateway: 192.168.10.1
+
+Ping 192.168.10.1:
+4 packets sent, 4 received, 0% loss.
+
+Ping 192.168.20.10:
+4 packets sent, 0 received, 100% loss.
+Replies report: Destination host unreachable from 192.168.10.1.
+
+Router configuration:
+
+interface GigabitEthernet0/0.10
+ encapsulation dot1Q 10
+ ip address 192.168.10.1 255.255.255.0
+ ip access-group TEST_ACL in
+
+interface GigabitEthernet0/0.20
+ encapsulation dot1Q 20
+ ip address 192.168.20.1 255.255.255.0
+
+ip access-list extended TEST_ACL
+ deny ip host 192.168.10.10 host 192.168.20.10
+ permit ip any any
+",ACL rule incorrectly blocks required inter-VLAN traffic.,Network,Access Control List (ACL),High,NetSage_Lab01_C043_ACL_Fault.pkt,ping 192.168.20.10; show running-config,Gateway is reachable but the server is unreachable; ACL denies PC1-to-server traffic.,ACL is blocking traffic between VLAN 10 and VLAN 20,1.0,The TEST_ACL denies traffic from 192.168.10.10 to 192.168.20.10,show access-lists,Remove or modify the deny rule in TEST_ACL to allow traffic between VLAN 10 and VLAN 20.,,,,Packet Tracer,1.0,Correct,ACL,ACL,ACL,ACL
+C044,SUBNET_MASK,PC1 can reach its default gateway but cannot communicate with another host in VLAN 10.,PC1 and the target host are in VLAN 10. The router gateway is 192.168.10.1.,ipconfig; ping 192.168.10.1; ping 192.168.10.20,"PC1 ipconfig:
+IPv4 Address: 192.168.10.10
+Subnet Mask: 255.255.0.0
+Default Gateway: 192.168.10.1
+
+Ping 192.168.10.1:
+4 packets sent, 4 received, 0% loss.
+
+Ping 192.168.10.20:
+4 packets sent, 0 received, 100% loss.",PC1 has an incorrect subnet mask.,Network,Subnetting,Medium,NetSage_Lab01_C044_SubnetMask_Fault.pkt,ipconfig; ping 192.168.10.20,Gateway is reachable but the host in the same VLAN is unreachable.,,,,,,Edited,SUBNET_MASK,,Packet Tracer,0.0,Incorrect,SUBNET_MASK,ACL,ACL,

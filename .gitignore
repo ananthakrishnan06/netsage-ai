@@ -1,0 +1,36 @@
+# Environment variables — NEVER commit real API keys
+.env
+
+# Python virtual environment
+.venv/
+venv/
+env/
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Distribution / packaging
+*.egg-info/
+dist/
+build/
+
+# Jupyter notebooks checkpoints
+.ipynb_checkpoints/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor/IDE
+.vscode/
+.idea/
+*.swp
+
+# Log files
+*.log
+
+# Local human review data (optional — remove this line to track reviews)
+data/human_reviews.jsonl
